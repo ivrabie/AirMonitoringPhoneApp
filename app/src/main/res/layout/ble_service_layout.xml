@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="82dp">
+
+
+    <TextView
+        android:id="@+id/ble_app_serv"
+        android:layout_width="314dp"
+        android:layout_height="41dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/ble_uuid"
+        app:layout_constraintEnd_toStartOf="@+id/open_app"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/ble_uuid"
+        android:layout_width="314dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="1dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toStartOf="@+id/open_app"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ble_app_serv" />
+
+    <Button
+        android:id="@+id/open_app"
+        android:layout_width="99dp"
+        android:layout_height="82dp"
+        android:text="Open"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ble_app_serv"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

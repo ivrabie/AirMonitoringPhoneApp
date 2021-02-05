@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="action_settings">Settings</string>
+    <string name="scan_ble">Scan Ble</string>
+    <string name="ble_not_supported">Ble not supported</string>
+    <string name="scanning">Scanning</string>
+    <string name="btnConnect">Connect</string>
+
+
+    <string name="twDeviceName">twDevName</string>
+    <string name="twMac">twMac</string>
+    <string name="twConnStatus">twConnStatus</string>
+    <string name="twRssi">twRssi</string>
+    <string name="twLatency">twLatency</string>
+
+    <string name="imgBtLogo">twDevName</string>
+    <string name="imgRssi">twMac</string>
+    <string name="imgLatency">twConnStatus</string>
+
+
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="LogoImg">BluetoothLogoImage</string>
+    <string name="LogoRssi">Rssi Logo</string>
+    <string name="ImgLatency">Logo Latency</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+
+</resources>
