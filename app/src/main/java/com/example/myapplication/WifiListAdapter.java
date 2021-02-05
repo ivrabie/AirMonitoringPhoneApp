@@ -46,10 +46,7 @@ public class  WifiListAdapter extends  RecyclerView.Adapter<WifiListAdapter.Wifi
         btnConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Toast.makeText(v.getContext(),"Button connect", Toast.LENGTH_SHORT).show();
-
-
             }
         });
         btnAutoConnect.setOnClickListener(new View.OnClickListener() {
