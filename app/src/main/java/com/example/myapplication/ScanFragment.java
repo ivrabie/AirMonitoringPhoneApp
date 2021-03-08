@@ -74,4 +74,17 @@ public class ScanFragment extends Fragment {
         }
     }
 
+    public void clearAllResults()
+    {
+        this.deviceList.clear();
+        this.adapter.notifyDataSetChanged();
+    }
+
+    public ArrayList<BleDeviceInfo> getDevices()
+    {
+        return this.deviceList;
+    }
+
+
+
 }

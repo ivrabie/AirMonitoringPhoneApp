@@ -51,17 +51,37 @@ public class BleDeviceInfoAdapter extends RecyclerView.Adapter<BleDeviceInfoAdap
             holder.name.setText(list_items.getScanRes().getDevice().getName());
         }
         holder.itemView.setOnClickListener(holder);
-
+        BleDeviceInfo dev = list_members.get(position);
         Button btn = holder.itemView.findViewById(R.id.Connect);
+
+        if(dev.isConnected == false)
+        {
+            btn.setText(holder.itemView.getResources().getString(R.string.btnConnect));
+        }
+        else
+        {
+            btn.setText(holder.itemView.getResources().getString(R.string.btnDisconnect));
+        }
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ItemScanListHandler handler = (ItemScanListHandler)mContext;
-                handler.btnHandler(list_members.get(position));
+                if (btn.getText().equals(v.getResources().getString(R.string.btnConnect)))
+                {
+                    btn.setText(v.getResources().getString(R.string.btnDisconnect));
+                    handler.btnConnectDevice(list_members.get(position));
+                    dev.isConnected = true;
+
+                }
+                else
+                {
+                    btn.setText(v.getResources().getString(R.string.btnConnect));
+                    handler.btnDisconnectDevice(list_members.get(position));
+                    dev.isConnected = false;
+                }
             }
         });
-
     }
 
 

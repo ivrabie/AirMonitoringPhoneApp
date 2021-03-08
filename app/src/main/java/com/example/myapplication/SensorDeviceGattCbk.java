@@ -20,22 +20,17 @@ public class SensorDeviceGattCbk extends BluetoothGattCallback {
     private  final  String TAG = "SensorDeviceGattCbk";
     private  final  int  mtu_size    = 512;
     private  final  byte scan_req_on = 1;
+
     List<BluetoothGattService> deviceServices;
     WifiAppServiceDescription  wifiAppServDesc;
-    BleDeviceInfo              devInfo;
-    ArrayList<BleServiceUuid> serviceList;
     ArrayList<String>         wifiAvbList;
     ArrayList<String>         wifiSavedList;
-    BleServiceRecycleListAdapter appFragAdapter;
     BleServiceUpdateUI uiUpdate;
     BluetoothGatt gatt;
     WifiAppUpdater wifiAppIf;
-    public SensorDeviceGattCbk(BleDeviceInfo devInfo, ArrayList<BleServiceUuid> serviceList,
-                               BleServiceRecycleListAdapter appFragAdapter, BleServiceUpdateUI uiUpdate) {
+    WifiUpdateConnection wifiConnection;
+    public SensorDeviceGattCbk(BleServiceUpdateUI uiUpdate) {
         super();
-        this.devInfo         = devInfo;
-        this.serviceList     = serviceList;
-        this.appFragAdapter  = appFragAdapter;
         this.wifiAppServDesc = new WifiAppServiceDescription();
         this.uiUpdate = uiUpdate;
         this.wifiAvbList = new ArrayList<>();
@@ -87,7 +82,7 @@ public class SensorDeviceGattCbk extends BluetoothGattCallback {
             {
                 if(gatt_serv.getUuid().equals(this.wifiAppServDesc.serviceUuid))
                 {
-                    serviceList.add(new BleServiceUuid("Wifi Connection", gatt_serv.getUuid().toString()));
+                    this.uiUpdate.addService(new BleServiceUuid("Wifi Connection", gatt_serv.getUuid().toString()));
                     gatt.requestMtu(mtu_size);
                 }
             }
@@ -106,6 +101,42 @@ public class SensorDeviceGattCbk extends BluetoothGattCallback {
         this.gatt.writeCharacteristic(wifiScanChr);
     }
 
+    public void connectWifiSsidPassword(String ssid, String password, WifiUpdateConnection conn)
+    {
+        BluetoothGattService wifiServ = this.gatt.getService(this.wifiAppServDesc.serviceUuid);
+        BluetoothGattCharacteristic wifiSsidPassChr = wifiServ.getCharacteristic(this.wifiAppServDesc.ssidPassChrUuid);
+        StringBuilder ssidPass = new StringBuilder();
+        ssidPass.append(ssid);
+        ssidPass.append("#");
+        ssidPass.append(password);
+        this.wifiConnection = conn;
+        wifiSsidPassChr.setValue(ssidPass.toString());
+        this.gatt.writeCharacteristic(wifiSsidPassChr);
+
+    }
+
+    public void connectWifiSsid(String ssid, WifiUpdateConnection conn)
+    {
+        BluetoothGattService wifiServ = this.gatt.getService(this.wifiAppServDesc.serviceUuid);
+        BluetoothGattCharacteristic wifiSavedChr = wifiServ.getCharacteristic(this.wifiAppServDesc.wifiSavedChrUuid);
+
+        this.wifiConnection = conn;
+        wifiSavedChr.setValue(ssid);
+        this.gatt.writeCharacteristic(wifiSavedChr);
+
+    }
+
+    public void disconectWifi(String ssid, WifiUpdateConnection conn)
+    {
+        BluetoothGattService wifiServ = this.gatt.getService(this.wifiAppServDesc.serviceUuid);
+        BluetoothGattCharacteristic wifiAvb = wifiServ.getCharacteristic(this.wifiAppServDesc.wifiAvbChrUuid);
+
+        this.wifiConnection = conn;
+        wifiAvb.setValue(ssid);
+        this.gatt.writeCharacteristic(wifiAvb);
+    }
+
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -114,60 +145,92 @@ public class SensorDeviceGattCbk extends BluetoothGattCallback {
         super.onCharacteristicRead(gatt, characteristic, status);
         Log.d(TAG, "onCharacteristicRead");
         byte []response  = characteristic.getValue();
-        if(characteristic.getUuid().equals(this.wifiAppServDesc.wifiAvbChrUuid)) {
-            String wifiAvbStr = new String(response, StandardCharsets.US_ASCII);
-            Log.d(TAG,wifiAvbStr);
-            String[] wifiList = wifiAvbStr.split(",");
-            for (String s : wifiList)
-            {
-                if(!s.isEmpty() && !s.trim().isEmpty())
-                {
-                    this.wifiAvbList.add(s);
-                }
-            }
-            BluetoothGattCharacteristic wifiSavedChr = gatt.getService(this.wifiAppServDesc.serviceUuid).getCharacteristic(this.wifiAppServDesc.wifiSavedChrUuid);
-            gatt.readCharacteristic(wifiSavedChr);
-        }
-        if(characteristic.getUuid().equals(this.wifiAppServDesc.wifiSavedChrUuid))
+        if(status == BluetoothGatt.GATT_SUCCESS)
         {
-            String wifiSavedStr = new String(response, StandardCharsets.US_ASCII);
-            Log.d(TAG, "Available:" + wifiSavedStr);
-            String[] wifiList = wifiSavedStr.split(",");
-            for (String s : wifiList)
-            {
-                if(!s.isEmpty() && !s.trim().isEmpty())
+            if(characteristic.getUuid().equals(this.wifiAppServDesc.wifiAvbChrUuid)) {
+                String wifiAvbStr = new String(response, StandardCharsets.US_ASCII);
+                Log.d(TAG,wifiAvbStr);
+                String[] wifiList = wifiAvbStr.split(",");
+                this.wifiAvbList.clear();
+                for (String s : wifiList)
                 {
-                    this.wifiSavedList.add(s);
+                    if(!s.isEmpty() && !s.trim().isEmpty())
+                    {
+                        this.wifiAvbList.add(s);
+                    }
+                }
+                BluetoothGattCharacteristic wifiSavedChr = gatt.getService(this.wifiAppServDesc.serviceUuid).getCharacteristic(this.wifiAppServDesc.wifiSavedChrUuid);
+                gatt.readCharacteristic(wifiSavedChr);
+            }
+
+            if(characteristic.getUuid().equals(this.wifiAppServDesc.wifiSavedChrUuid))
+            {
+                String wifiSavedStr = new String(response, StandardCharsets.US_ASCII);
+                Log.d(TAG, "Available:" + wifiSavedStr);
+                String[] wifiList = wifiSavedStr.split(",");
+                this.wifiSavedList.clear();
+                for (String s : wifiList)
+                {
+                    if(!s.isEmpty() && !s.trim().isEmpty())
+                    {
+                        this.wifiSavedList.add(s);
+                    }
+                }
+                if(this.wifiAppIf != null)
+                {
+                    this.wifiAppIf.updateWifiList(wifiAvbList, wifiSavedList);
                 }
             }
-            if(this.wifiAppIf != null)
+
+            if(characteristic.getUuid().equals(this.wifiAppServDesc.ssidPassChrUuid))
             {
-                this.wifiAppIf.updateWifiList(wifiAvbList, wifiSavedList);
+                if(response.length == 1)
+                {
+                    if(wifiConnection != null) {
+                        wifiConnection.update(response[0]);
+                        if (response[0] == 1)
+                        {
+                            BluetoothGattService wifiServ = this.gatt.getService(this.wifiAppServDesc.serviceUuid);
+                            BluetoothGattCharacteristic wifiSsidPassChr = wifiServ.getCharacteristic(this.wifiAppServDesc.ssidPassChrUuid);
+                            gatt.readCharacteristic(wifiSsidPassChr);
+                        }
+                    }
+                }
             }
         }
+
     }
 
     @Override
     public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicWrite(gatt, characteristic, status);
         Log.d(TAG, "onCharacteristicWrite " + String.valueOf(status));
-        byte []response  = characteristic.getValue();
-        if(characteristic.getUuid().equals(this.wifiAppServDesc.scanChrUuid))
+
+        byte[] response = characteristic.getValue();
+        if (status == BluetoothGatt.GATT_SUCCESS)
         {
-            if(response[0] == scan_req_on)
+            if (characteristic.getUuid().equals(this.wifiAppServDesc.scanChrUuid))
             {
                 BluetoothGattCharacteristic wifiAvbChr = gatt.getService(this.wifiAppServDesc.serviceUuid).getCharacteristic(this.wifiAppServDesc.wifiAvbChrUuid);
                 gatt.readCharacteristic(wifiAvbChr);
             }
+
+            if (characteristic.getUuid().equals(this.wifiAppServDesc.ssidPassChrUuid) ||
+                characteristic.getUuid().equals(this.wifiAppServDesc.wifiSavedChrUuid) ||
+                characteristic.getUuid().equals(this.wifiAppServDesc.wifiAvbChrUuid))
+            {
+                BluetoothGattService wifiServ = this.gatt.getService(this.wifiAppServDesc.serviceUuid);
+                BluetoothGattCharacteristic wifiSsidPassChr = wifiServ.getCharacteristic(this.wifiAppServDesc.ssidPassChrUuid);
+                gatt.readCharacteristic(wifiSsidPassChr);
+            }
         }
-
-
     }
 
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
         Log.d(TAG, "onCharacteristicChanged");
+        byte []response  = characteristic.getValue();
     }
 
     @Override

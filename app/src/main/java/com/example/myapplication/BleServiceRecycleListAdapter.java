@@ -20,7 +20,6 @@ import java.util.UUID;
 public class BleServiceRecycleListAdapter extends RecyclerView.Adapter<BleServiceRecycleListAdapter.ServiceHolder> {
 
     private ArrayList<BleServiceUuid> services;
-    ArrayList<BleServiceUuid> openApps;
     ServiceHolder serviceHolder;
     private final LayoutInflater inflater;
     private Context mContext;
@@ -31,7 +30,6 @@ public class BleServiceRecycleListAdapter extends RecyclerView.Adapter<BleServic
         this.mContext = mContext;
         this.services = list_members;
         inflater=LayoutInflater.from(mContext);
-        this.openApps = new ArrayList<>();
         this.app_hnd = app_hnd;
     }
 
@@ -51,22 +49,36 @@ public class BleServiceRecycleListAdapter extends RecyclerView.Adapter<BleServic
 
         holder.itemView.setOnClickListener(holder);
         Button btn = holder.itemView.findViewById(R.id.open_app);
+        if( services.size() > 0)
+        {
+            BleServiceUuid serviceApp = services.get(position);
+            if(serviceApp.isOpen == true)
+            {
+                btn.setText(holder.itemView.getResources().getString(R.string.btnClose));
+            }
+            else
+            {
+                btn.setText(holder.itemView.getResources().getString(R.string.btnOpen));
+            }
+        }
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean foundOpenApp = false;
-                for(BleServiceUuid ble_uuid : openApps)
+                if(services.get(position).isOpen == false)
                 {
-                    if(ble_uuid.uuid.equals(services.get(position).uuid))
-                    {
-                        foundOpenApp = true;
-                    }
+                    services.add(services.get(position));
+                    app_hnd.handleOpenWifiApp();
+                    btn.setText(v.getResources().getString(R.string.btnClose));
+                    services.get(position).isOpen = true;
+
                 }
-                if(foundOpenApp == false)
+                else
                 {
-                    openApps.add(services.get(position));
-                    app_hnd.hadleOpenWifiApp();
+                    services.remove(services.get(position));
+                    app_hnd.handleCloseWifiApp();
+                    btn.setText(v.getResources().getString(R.string.btnOpen));
+                    services.get(position).isOpen = false;
                 }
             }
         });

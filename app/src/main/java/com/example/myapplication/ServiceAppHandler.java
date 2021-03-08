@@ -4,5 +4,6 @@ import androidx.fragment.app.Fragment;
 
 public interface ServiceAppHandler {
 
-    void hadleOpenWifiApp();
+    void handleOpenWifiApp();
+    void handleCloseWifiApp();
 }

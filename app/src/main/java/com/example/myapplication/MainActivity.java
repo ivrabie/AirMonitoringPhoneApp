@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements ItemScanListHandl
     final  static  String TAG = "Main activity";
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
-    ArrayList<BleDeviceInfo> devicesConnected;
+
     int REQUEST_ENABLE_BT = 3;
     private static final long SCAN_PERIOD = 10000;
     private BluetoothLeScanner bluetoothLeScanner;
@@ -51,8 +51,9 @@ public class MainActivity extends AppCompatActivity implements ItemScanListHandl
     private ViewPager viewPager;
     private TabLayout   tabLayout;
     private RecyclerView recyclerView;
-    private Fragment scanFragment;
+    private ScanFragment scanFragment;
     private int      manufactureId = 0xAEEA;
+    private ArrayList<DeviceFragment> devFragments;
     AppTabFragmentAdapter viewPagerAdapt;
     @SuppressLint("NewApi")
     @Override
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements ItemScanListHandl
         viewPagerAdapt = new AppTabFragmentAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapt.addFragment(scanFragment, "Scanner");
         viewPager.setAdapter(viewPagerAdapt);
-        devicesConnected = new ArrayList<>();
+        devFragments = new ArrayList<>();
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
@@ -147,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements ItemScanListHandl
 
 
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -156,6 +158,12 @@ public class MainActivity extends AppCompatActivity implements ItemScanListHandl
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.ble_scan) {
+
+            ArrayList<BleDeviceInfo> devList = ((ScanFragment)scanFragment).getDevices();
+            for(BleDeviceInfo dev : devList) {
+                this.btnDisconnectDevice(dev);
+            }
+            ((ScanFragment)scanFragment).clearAllResults();
             this.scanLeDevice();
             return true;
         }
@@ -165,21 +173,48 @@ public class MainActivity extends AppCompatActivity implements ItemScanListHandl
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
-    public void btnHandler(BleDeviceInfo dev) {
-        boolean found = this.devicesConnected.contains(dev);
-        if(found == false)
+    public void btnConnectDevice(BleDeviceInfo dev) {
+        DeviceFragment devFragFound = null;
+        for(DeviceFragment devFrag : devFragments)
         {
-            Toast.makeText(getApplicationContext(), "Test activity hdl", Toast.LENGTH_SHORT);
-
-            DeviceFragment frag = new DeviceFragment(dev);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                viewPagerAdapt.addFragment(frag, dev.getScanRes().getDevice().getName() + "\n" +
-                        dev.getScanRes().getDevice().getAddress());
+            if(devFrag.getDeviceInfo().getScanRes().getDevice().getAddress().equals(dev.getScanRes().getDevice().getAddress()))
+            {
+                devFragFound = devFrag;
             }
-            this.devicesConnected.add(dev);
+        }
+        if(devFragFound == null)
+        {
+            devFragFound = new DeviceFragment(this, dev);
+            devFragments.add(devFragFound);
+        }
+        else
+        {
+            devFragFound.connectDevice();
+        }
+
+        viewPagerAdapt.addFragment(devFragFound, dev.getScanRes().getDevice().getName() + "\n" +
+                    dev.getScanRes().getDevice().getAddress());
+        viewPagerAdapt.notifyDataSetChanged();
+        viewPager.setCurrentItem(this.viewPagerAdapt.getCount());
+        viewPagerAdapt.notifyDataSetChanged();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void btnDisconnectDevice(BleDeviceInfo dev) {
+         DeviceFragment devFragFound = null;
+        for(DeviceFragment devFrag : devFragments)
+        {
+            if(devFrag.getDeviceInfo().getScanRes().getDevice().getAddress().equals(dev.getScanRes().getDevice().getAddress()))
+            {
+                devFragFound = devFrag;
+            }
+        }
+        if(devFragFound != null)
+        {
+            viewPagerAdapt.deleteFragment(devFragFound);
             viewPagerAdapt.notifyDataSetChanged();
-            viewPager.setCurrentItem(this.devicesConnected.size());
-            viewPagerAdapt.notifyDataSetChanged();
+            devFragFound.disconnectDevice();
         }
 
     }

@@ -5,7 +5,10 @@
     <string name="ble_not_supported">Ble not supported</string>
     <string name="scanning">Scanning</string>
     <string name="btnConnect">Connect</string>
+    <string name="btnDisconnect">Disconnect</string>
 
+    <string name="btnOpen">Open</string>
+    <string name="btnClose">Close</string>
 
     <string name="twDeviceName">twDevName</string>
     <string name="twMac">twMac</string>
@@ -17,6 +20,7 @@
     <string name="imgRssi">twMac</string>
     <string name="imgLatency">twConnStatus</string>
 
+    <string name="password">Okay</string>
 
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>

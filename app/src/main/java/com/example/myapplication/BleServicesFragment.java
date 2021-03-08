@@ -22,20 +22,13 @@ public class BleServicesFragment extends Fragment implements  BleServiceUpdateUI
 
 
     BleServiceRecycleListAdapter recycleAdapter;
-    BleDeviceInfo dev_info;
     public ArrayList<BleServiceUuid> serviceList;
-    SensorDeviceGattCbk deviceGattCbk;
     ServiceAppHandler app_hnd;
-    public BleServicesFragment(BleDeviceInfo dev_info, ServiceAppHandler app_hnd) {
-        this.dev_info = dev_info;
-        serviceList = new ArrayList<>();
+    public BleServicesFragment(ServiceAppHandler app_hnd, ArrayList<BleServiceUuid> serviceList) {
+        this.serviceList = serviceList;
         this.app_hnd = app_hnd;
     }
 
-    public BleServicesFragment() {
-        serviceList = new ArrayList<>();
-
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,23 +48,10 @@ public class BleServicesFragment extends Fragment implements  BleServiceUpdateUI
         super.onViewCreated(view, savedInstanceState);
         RecyclerView mRecycleView = (RecyclerView) view.findViewById(R.id.serv_recycle_view);
         mRecycleView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        recycleAdapter = new BleServiceRecycleListAdapter(view.getContext(), this.serviceList,app_hnd);
+        recycleAdapter = new BleServiceRecycleListAdapter(view.getContext(), this.serviceList, app_hnd);
         mRecycleView.setAdapter(recycleAdapter);
-        deviceGattCbk = new SensorDeviceGattCbk(this.dev_info, serviceList, recycleAdapter, this);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if(dev_info != null)
-            {
-                this.dev_info.getScanRes().getDevice().connectGatt(view.getContext(), false, deviceGattCbk);
-            }
-
-        }
     }
 
-    public SensorDeviceGattCbk getSensorDeviceCbk()
-    {
-        return this.deviceGattCbk;
-    }
 
     @Override
     public void updateUI() {
@@ -82,5 +62,12 @@ public class BleServicesFragment extends Fragment implements  BleServiceUpdateUI
             }
         });
 
+    }
+
+    @Override
+    public void addService(BleServiceUuid serviceUuid)
+    {
+        this.serviceList.add(serviceUuid);
+        this.updateUI();
     }
 }

@@ -10,9 +10,11 @@ import androidx.annotation.RequiresApi;
 
 public class BleDeviceInfo implements Parcelable {
     ScanResult  scanRes;
+    public boolean isConnected;
     public BleDeviceInfo(ScanResult  scanRes)
     {
         this.scanRes = scanRes;
+        isConnected = false;
     }
 
     public BleDeviceInfo(Parcel  scanRes)

@@ -24,6 +24,7 @@ public class WifiConnectionFragment extends Fragment implements WifiAppUpdater{
     ArrayList<WifiNetwork> netDisc;
     WifiListAdapter recycleAdapter;
     SensorDeviceGattCbk devGattCbk;
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public WifiConnectionFragment(SensorDeviceGattCbk devGattCbk) {
         super();
         netDisc = new ArrayList<>();
@@ -51,11 +52,40 @@ public class WifiConnectionFragment extends Fragment implements WifiAppUpdater{
         super.onViewCreated(view, savedInstanceState);
         RecyclerView mRecycleView = (RecyclerView) view.findViewById(R.id.ListWifi);
         mRecycleView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        recycleAdapter = new WifiListAdapter(view.getContext(), this.netDisc);
+        recycleAdapter = new WifiListAdapter(view.getContext(), this.netDisc, this.devGattCbk);
         mRecycleView.setAdapter(recycleAdapter);
         this.devGattCbk.setWifiAppUpdater(this);
         this.devGattCbk.startWifiScan();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    public void startScanBt()
+    {
+        this.devGattCbk.startWifiScan();
+    }
+
+    public void clearAll()
+    {
+        netDisc.clear();
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                recycleAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
 
     @Override
     public void updateWifiList(ArrayList<String> wifiAvb, ArrayList<String> savedWifi) {

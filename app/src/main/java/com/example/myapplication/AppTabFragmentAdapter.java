@@ -1,9 +1,12 @@
 package com.example.myapplication;
 
+import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -31,11 +34,24 @@ public class AppTabFragmentAdapter extends FragmentStatePagerAdapter {
     }
 
 
-    public void addFragment(Fragment fragmentLayout, String title)
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void addFragment(Fragment frag, String title)
     {
-        fragments.add(fragmentLayout);
+        fragments.add(frag);
         fragmentTitles.add(title);
     }
+
+
+    public void deleteFragment(Fragment frag)
+    {
+        int idx = this.fragments.indexOf(frag);
+        if(idx >= 0)
+        {
+            fragments.remove(idx);
+            fragmentTitles.remove(idx);
+        }
+    }
+
 
 
 

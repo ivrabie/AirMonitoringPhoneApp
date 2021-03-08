@@ -31,7 +31,7 @@
         android:id="@+id/open_app"
         android:layout_width="99dp"
         android:layout_height="82dp"
-        android:text="Open"
+        android:text="@string/btnOpen"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/ble_app_serv"
         app:layout_constraintTop_toTopOf="parent" />

@@ -57,4 +57,10 @@ public class DeviceAppFragmentAdapter extends FragmentStatePagerAdapter {
         fragments.add(fragmentLayout);
         fragmentTitles.add(title);
     }
+
+    public void deleteFragment(Fragment fragmentLayout, String title)
+    {
+        fragments.remove(fragmentLayout);
+        fragmentTitles.remove(title);
+    }
 }
